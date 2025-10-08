@@ -1,3 +1,4 @@
+
 <template>
   <div class="dashboard">
     <header class="app-header glass-effect">
@@ -74,8 +75,8 @@
             class="history-item"
             @click="fetchWeather(item.name)"
           >
-            <span>{{ item.name }}</span>
-            <span class="separator"> - </span>
+            <span>{{ item.name }} </span>
+            <span class="separator"></span>
             <small>{{ formatDate(item.lastSearched) }}</small>
           </div>
         </div>
@@ -199,7 +200,7 @@ export default {
 
     const formatDate = (dateString) => {
       const options = { year: 'numeric', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' };
-      return new Date(dateString).toLocaleDateString('fr-FR', options).replace(',', ' à');
+      return ' ' + new Date(dateString).toLocaleDateString('fr-FR', options).replace(',', ' à ');
     };
 
     const addToSearchHistory = (weatherData) => {
@@ -211,7 +212,7 @@ export default {
       } else {
         history.unshift({
           id: weatherData.id,
-          name: weatherData.name,
+          name: weatherData.name.trim(), // Nettoyer le nom pour éviter les espaces indésirables
           country: weatherData.sys.country,
           lastSearched: new Date().toISOString(),
           weather: weatherData.weather[0],
@@ -421,14 +422,14 @@ nav {
 .history-list {
   display: flex;
   flex-direction: column;
-  gap: 0.5rem;
+  gap: 0.75rem;
 }
 
 .history-item {
   display: flex;
   align-items: center;
-  gap: 0.5rem;
-  padding: 0.5rem;
+  gap: 0.75rem;
+  padding: 0.75rem;
   cursor: pointer;
   transition: background 0.2s;
 }
@@ -440,14 +441,17 @@ nav {
 
 .history-item span {
   font-weight: 500;
+  margin-right: 0.5rem;
 }
 
 .history-item .separator {
   color: #666;
+  margin: 0 0.5rem;
 }
 
 .history-item small {
   color: #888;
+  font-size: 0.9rem;
 }
 
 .no-favorites {
@@ -488,6 +492,23 @@ nav {
     flex-direction: column;
     gap: 1rem;
     padding: 1rem;
+  }
+  
+  .history-item {
+    gap: 0.5rem;
+    padding: 0.5rem;
+  }
+  
+  .history-item span {
+    margin-right: 0.3rem;
+  }
+  
+  .history-item .separator {
+    margin: 0 0.3rem;
+  }
+  
+  .history-item small {
+    font-size: 0.8rem;
   }
 }
 </style>
