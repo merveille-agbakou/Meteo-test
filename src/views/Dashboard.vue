@@ -75,6 +75,7 @@
             @click="fetchWeather(item.name)"
           >
             <span>{{ item.name }}</span>
+            <span class="separator"> - </span>
             <small>{{ formatDate(item.lastSearched) }}</small>
           </div>
         </div>
@@ -114,10 +115,10 @@ export default {
     const API_KEY = import.meta.env.VITE_OPENWEATHER_API_KEY;
     const UNITS = 'metric';
     const LANG = 'fr';
-    
+
     // Gestion des favoris
     const favorites = ref(JSON.parse(localStorage.getItem('favorites') || '[]'));
-    
+
     const toggleFavorite = (weather) => {
       const index = favorites.value.findIndex(fav => fav.id === weather.id);
       if (index === -1) {
@@ -130,11 +131,11 @@ export default {
       // Sauvegarder dans le localStorage
       localStorage.setItem('favorites', JSON.stringify(favorites.value));
     };
-    
+
     const isFavorite = (id) => {
       return favorites.value.some(fav => fav.id === id);
     };
-    
+
     const selectFavorite = (favorite) => {
       currentWeather.value = { ...favorite };
     };
@@ -152,7 +153,7 @@ export default {
         const response = await axios.get(
           `https://api.openweathermap.org/data/2.5/weather?q=${encodeURIComponent(searchQuery)}&units=${UNITS}&lang=${LANG}&appid=${API_KEY}`
         );
-        
+
         if (response.status !== 200) {
           throw new Error('Ville non trouvée');
         }
@@ -176,15 +177,15 @@ export default {
       try {
         loading.value = true;
         error.value = '';
-        
+
         const response = await axios.get(
           `https://api.openweathermap.org/data/2.5/weather?lat=${suggestion.coord.lat}&lon=${suggestion.coord.lon}&units=${UNITS}&lang=${LANG}&appid=${API_KEY}`
         );
-        
+
         if (response.status !== 200) {
           throw new Error('Ville non trouvée');
         }
-        
+
         const data = response.data;
         currentWeather.value = data;
         addToSearchHistory(data);
@@ -198,19 +199,16 @@ export default {
 
     const formatDate = (dateString) => {
       const options = { year: 'numeric', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' };
-      return new Date(dateString).toLocaleDateString('fr-FR', options);
+      return new Date(dateString).toLocaleDateString('fr-FR', options).replace(',', ' à');
     };
 
     const addToSearchHistory = (weatherData) => {
-      // Implémentation de l'historique des recherches
       const history = [...searchHistory.value];
       const existingIndex = history.findIndex(item => item.id === weatherData.id);
-      
+
       if (existingIndex !== -1) {
-        // Mettre à jour la date si la ville est déjà dans l'historique
         history[existingIndex].lastSearched = new Date().toISOString();
       } else {
-        // Ajouter la nouvelle ville à l'historique
         history.unshift({
           id: weatherData.id,
           name: weatherData.name,
@@ -220,8 +218,7 @@ export default {
           main: weatherData.main
         });
       }
-      
-      // Limiter à 10 entrées
+
       const limitedHistory = history.slice(0, 10);
       searchHistory.value = limitedHistory;
       localStorage.setItem('searchHistory', JSON.stringify(limitedHistory));
@@ -382,10 +379,6 @@ nav {
   margin-top: 2rem;
 }
 
-.main-weather {
-  margin-bottom: 3rem;
-}
-
 .favorites-section {
   margin-top: 3rem;
 }
@@ -411,6 +404,50 @@ nav {
 
 .favorite-card:hover {
   transform: translateY(-5px);
+}
+
+.history-section {
+  margin-top: 3rem;
+}
+
+.history-section h2 {
+  color: #2c3e50;
+  margin-bottom: 1.5rem;
+  font-size: 1.5rem;
+  border-bottom: 2px solid #eee;
+  padding-bottom: 0.5rem;
+}
+
+.history-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.history-item {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.history-item:hover {
+  background: rgba(0, 0, 0, 0.05);
+  border-radius: 4px;
+}
+
+.history-item span {
+  font-weight: 500;
+}
+
+.history-item .separator {
+  color: #666;
+}
+
+.history-item small {
+  color: #888;
 }
 
 .no-favorites {
