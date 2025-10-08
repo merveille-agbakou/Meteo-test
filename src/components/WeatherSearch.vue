@@ -39,6 +39,8 @@
 </template>
 
 <script>
+import axios from 'axios';
+
 const API_KEY = import.meta.env.VITE_OPENWEATHER_API_KEY;
 
 export default {
@@ -86,13 +88,13 @@ export default {
       
       this.debounce = setTimeout(async () => {
         try {
-          const response = await fetch(
+          const response = await axios.get(
             `https://api.openweathermap.org/geo/1.0/direct?q=${encodeURIComponent(searchQuery)}&limit=5&appid=${API_KEY}`
           );
           
-          if (!response.ok) throw new Error('Erreur lors de la récupération des suggestions');
+          if (response.status !== 200) throw new Error('Erreur lors de la récupération des suggestions');
           
-          const data = await response.json();
+          const data = response.data;
           this.suggestions = data.map(item => ({
             id: `${item.lat}-${item.lon}`,
             name: item.name,

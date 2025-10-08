@@ -91,8 +91,9 @@
 </template>
 
 <script>
-import { ref, computed } from 'vue';
+import { ref } from 'vue';
 import { useRouter } from 'vue-router';
+import axios from 'axios';
 import WeatherSearch from '../components/WeatherSearch.vue';
 import WeatherStats from '../components/WeatherStats.vue';
 import WeatherCard from '../components/WeatherCard.vue';
@@ -148,15 +149,15 @@ export default {
       error.value = '';
 
       try {
-        const response = await fetch(
+        const response = await axios.get(
           `https://api.openweathermap.org/data/2.5/weather?q=${encodeURIComponent(searchQuery)}&units=${UNITS}&lang=${LANG}&appid=${API_KEY}`
         );
         
-        if (!response.ok) {
+        if (response.status !== 200) {
           throw new Error('Ville non trouvée');
         }
 
-        const data = await response.json();
+        const data = response.data;
         currentWeather.value = data;
         addToSearchHistory(data);
       } catch (err) {
@@ -176,15 +177,15 @@ export default {
         loading.value = true;
         error.value = '';
         
-        const response = await fetch(
+        const response = await axios.get(
           `https://api.openweathermap.org/data/2.5/weather?lat=${suggestion.coord.lat}&lon=${suggestion.coord.lon}&units=${UNITS}&lang=${LANG}&appid=${API_KEY}`
         );
         
-        if (!response.ok) {
+        if (response.status !== 200) {
           throw new Error('Ville non trouvée');
         }
         
-        const data = await response.json();
+        const data = response.data;
         currentWeather.value = data;
         addToSearchHistory(data);
       } catch (err) {
@@ -230,14 +231,16 @@ export default {
       currentWeather,
       favorites,
       loading,
-      searchHistory: searchHistory,  // Exposer l'historique des recherches
+      error,
+      searchHistory,
       handleSearch,
       toggleFavorite,
       isFavorite,
       selectFavorite,
-      addToSearchHistory,  // Exposer la fonction d'ajout à l'historique
-      formatDate,          // Exposer la fonction de formatage de date
-      fetchWeather         // Exposer la fonction de récupération météo
+      handleSuggestionSelected,
+      addToSearchHistory,
+      formatDate,
+      fetchWeather
     };
   }
 };
